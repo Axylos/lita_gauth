@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Auth Redir</title>
+  </head>
+  <body>
+    <img src="https://media.giphy.com/media/y0SJVYxf90J1u/giphy.gif" />
+
+    <script type="application/javascript">
+      function showWinner() {
+        const img_url = "https://t1.rbxcdn.com/2997bd147bbf3a8851fbf57339b0e177";
+        const tmpl = `
+          <div>
+            <img src="${img_url}" />
+          </div>`;
+
+        render(tmpl);
+      }
+
+      function showSad(err) {
+        const sad_img = "http://www.roadtoepic.com/wp-content/uploads/2013/07/Sad-by-Kate-Alexander1.jpg";
+        const tmpl = `
+          <div>
+            <p>Sorry something went wrong!</p>
+            <p>${JSON.stringify(err)}</p>
+            <img src="${img_url}" />
+          </div>
+        `;
+
+        render(tmpl);
+      }
+
+      function render(tmpl) {
+        const body = document.querySelector('body');
+        window.setTimeout(() => {
+          body.innerHTML = tmpl;
+        }, 3000);
+      }
+
+      const key = <%= @storage_key %>;
+      const userId = localStorage.getItem(key);
+      const code = <%= @code %>;
+      const base_url = <%= @base_url %>;
+      fetch("${base_url}/auth-save/${userId}/${code}")
+        .then(resp => {
+          if (resp.ok) {
+            return resp.json()
+          } else {
+            throw Error('Something went wrong with the server!');
+          }
+        }).then(showWinner)
+        .catch(showSad);
+        
+    </script>
+  </body>
+</html>
