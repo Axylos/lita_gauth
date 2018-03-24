@@ -1,4 +1,3 @@
-require 'byebug'
 require 'google_auth_box'
 module Lita
   module Handlers

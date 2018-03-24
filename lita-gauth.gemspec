@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-gauth"
-  spec.version       = "0.1.0.1"
+  spec.version       = "0.1.0.2"
   spec.authors       = ["Axylos"]
   spec.email         = ["robertdraketalley@gmail.com"]
   spec.description   = "auth with google api"
@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "lita", ">= 4.7"
-  spec.add_development_dependency "google_auth_box", ">= 0.1.0"
+  spec.add_dependency "google_auth_box", ">= 0.1.0"
 
   spec.add_development_dependency "bundler", "~> 1.3"
 
