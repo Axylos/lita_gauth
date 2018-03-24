@@ -2,17 +2,29 @@ require 'google_auth_box'
 module Lita
   module Handlers
     class Gauth < Handler
-      config :secret_key
-      config :client_id_hash
-      config :scopes
-      config :data_file_path
-      config :base_uri
+      config :secret_key, required: true 
+
+      config :client_id_hash, required: true
+
+      config :scopes, required: true
+
+      config :data_file_path, required: true
+
+      config :base_uri, required: true
 
       route(/^authed\?$/, :check_auth, command: true)
       route(/^auth me$/, :request_auth, command: true)
+
+      route(/^foo$/, :bar)
       http.get 'auth-redir', :auth_redir
       http.get 'auth-root/:id', :auth_root
       http.get 'auth-save/:user_id/', :auth_save
+
+      def bar(msg)
+        p 'called'
+        p config.secret_key
+        msg.reply "hey there"
+      end
       
       def get_user_creds(user_id)
         auth_client.get_creds user_id
