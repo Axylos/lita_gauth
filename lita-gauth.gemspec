@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-gauth"
-  spec.version       = "0.1.0.4"
+  spec.version       = "0.1.0.5"
   spec.authors       = ["Axylos"]
   spec.email         = ["robertdraketalley@gmail.com"]
   spec.description   = "auth with google api"

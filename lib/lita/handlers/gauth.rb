@@ -2,6 +2,9 @@ require 'google_auth_box'
 module Lita
   module Handlers
     class Gauth < Handler
+      on :connected, :log_conn
+      on :disconnected, :log_kick
+
       config :client_id_hash, required: true
 
       config :scopes, required: true
@@ -15,9 +18,29 @@ module Lita
       route(/^auth me$/, :request_auth, command: true)
 
       route(/^foo$/, :bar)
-      http.get 'auth-redir', :auth_redir
-      http.get 'auth-root/:id', :auth_root
-      http.get 'auth-save/:user_id/', :auth_save
+      http.get '/auth-redir', :auth_redir
+      http.get '/auth-root/:id', :auth_root
+      http.get '/auth-save/:user_id/', :auth_save
+      http.get '/foo', :foo
+      http.get '/bar', :bar
+
+      def log_conn(payload)
+        p "it worked"
+        p payload
+      end
+
+      def log_kick(payload)
+        p 'sad panda'
+        p payload
+      end
+
+      def foo(req, resp)
+        resp.body << "hey there"
+      end
+
+      def bar(req, resp)
+        resp.body << "it worked"
+      end
 
       def get_user_creds(user_id)
         auth_client.get_creds user_id
@@ -30,6 +53,8 @@ module Lita
           url = auth_client.get_auth_url
           msg.reply "You are not authed"
           msg.reply "Please click the following link to register with the goog: #{url}"
+        else
+          msg.reply "You are ready to go!"
         end
       end
 
@@ -41,7 +66,7 @@ module Lita
         attrs = {
           storage_key: 'lita_gauth_user_id',
           code: req.params["code"],
-          base_url: build_redir_url
+          base_url: "#{config.base_domain}/auth-save"
         }
         resp.body << render_template("auth_redir.html", attrs)
       end
@@ -49,7 +74,7 @@ module Lita
       def auth_root(req, resp)
         attrs = {
           "auth_redir_url": auth_client.get_auth_url,
-          "user_id": JSON.parse(req.env["router.params"][:id]),
+          "user_id": req.env["router.params"][:id],
           "storage_key": "lita_gauth_user_id"
         }
 
@@ -57,13 +82,14 @@ module Lita
       end
 
       def auth_save(req, resp)
-        user_id = JSON.parse(req.env['router.params'][:user_id])
+        user_id = req.env['router.params'][:user_id]
         save_creds user_id, req.params["code"]
         resp.write MultiJson.dump(msg: "ok")
       end
 
       def request_auth(msg)
-        url = "#{config.base_domain}/auth-root"
+        id = msg.user.id
+        url = "#{config.base_domain}/auth-root/#{id}"
         msg.reply "Click the followin link to do the thing! #{url}"
       end
 

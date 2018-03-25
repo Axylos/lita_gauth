@@ -16,11 +16,13 @@
       allowFullScreen>
     </iframe>
     <script type="application/javascript">
-      const user_id = <%= @user_id %>;
-      const key = <%= @storage_key %>;
-      localStorage.setItem(key, JSON.stringify(user_id))
-      const auth_url = <%= @auth_redir_url %>
-      window.location.href = auth_url
+      const user_id = '<%= @user_id %>';
+      const key = '<%= @storage_key %>';
+      localStorage.setItem(key, user_id);
+      const auth_url = '<%= @auth_redir_url %>';
+      window.setTimeout(() => {
+        window.location.href = auth_url;
+      }, 3000)
     </script>
   </body>
 </html>

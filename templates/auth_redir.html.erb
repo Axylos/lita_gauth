@@ -12,7 +12,7 @@
       function showWinner() {
         const img_url = "https://t1.rbxcdn.com/2997bd147bbf3a8851fbf57339b0e177";
         const tmpl = `
-          <div>
+          <div style="display: flex; justify-content: center">
             <img src="${img_url}" />
           </div>`;
 
@@ -25,7 +25,7 @@
           <div>
             <p>Sorry something went wrong!</p>
             <p>${JSON.stringify(err)}</p>
-            <img src="${img_url}" />
+            <img src="${sad_img}" />
           </div>
         `;
 
@@ -39,11 +39,12 @@
         }, 3000);
       }
 
-      const key = <%= @storage_key %>;
+      const key = "<%= @storage_key %>";
       const userId = localStorage.getItem(key);
-      const code = <%= @code %>;
-      const base_url = <%= @base_url %>;
-      fetch("${base_url}/auth-save/${userId}/${code}")
+      const code = "<%= @code %>";
+      const base_url = "<%= @base_url %>";
+      const url = `${base_url}/${userId}/?code=${encodeURIComponent(code)}`;
+      fetch(url)
         .then(resp => {
           if (resp.ok) {
             return resp.json()
