@@ -2,15 +2,14 @@ require 'google_auth_box'
 module Lita
   module Handlers
     class Gauth < Handler
-      config :secret_key, required: true 
-
       config :client_id_hash, required: true
 
       config :scopes, required: true
 
       config :data_file_path, required: true
 
-      config :base_uri, required: true
+      config :base_domain, required: true
+      config :oauth_redir_path, required: true
 
       route(/^authed\?$/, :check_auth, command: true)
       route(/^auth me$/, :request_auth, command: true)
@@ -20,12 +19,6 @@ module Lita
       http.get 'auth-root/:id', :auth_root
       http.get 'auth-save/:user_id/', :auth_save
 
-      def bar(msg)
-        p 'called'
-        p config.secret_key
-        msg.reply "hey there"
-      end
-      
       def get_user_creds(user_id)
         auth_client.get_creds user_id
       end
@@ -48,7 +41,7 @@ module Lita
         attrs = {
           storage_key: 'lita_gauth_user_id',
           code: req.params["code"],
-          base_url: config.base_uri
+          base_url: build_redir_url
         }
         resp.body << render_template("auth_redir.html", attrs)
       end
@@ -70,8 +63,12 @@ module Lita
       end
 
       def request_auth(msg)
-        url = "#{config.base_uri}/auth-root"
+        url = "#{config.base_domain}/auth-root"
         msg.reply "Click the followin link to do the thing! #{url}"
+      end
+
+      def build_redir_url
+        "#{config.base_domain}#{config.oauth_redir_path}"
       end
 
       def auth_client
@@ -79,7 +76,7 @@ module Lita
           client_id_hash: config.client_id_hash,
           scopes: config.scopes,
           data_file_path: config.data_file_path,
-          base_uri: config.base_uri
+          base_uri: build_redir_url
         )
       end
 

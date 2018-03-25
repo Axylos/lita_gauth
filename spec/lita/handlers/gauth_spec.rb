@@ -1,11 +1,14 @@
 require "spec_helper"
+require 'byebug'
 
 describe Lita::Handlers::Gauth, lita_handler: true do
   let(:robot) { Lita::Robot.new(registry) }
   let(:file_path) { './test_file_path' }
-  let(:base_uri) { "http://uri.com/auth-redir" }
-  subject { Lita::Handlers::Gauth.new(robot) }
-  let(:handler) { subject }
+  let(:base_domain) { "http://uri.com/virgil" }
+  let(:oauth_redir_path) { "/auth-redir" }
+  let(:handler) { Lita::Handlers::Gauth.new robot }
+  # subject { Lita::Handlers::Gauth.new(robot) }
+  subject { handler }
 
   before do
     robot.config.handlers.gauth.client_id_hash = {
@@ -16,7 +19,8 @@ describe Lita::Handlers::Gauth, lita_handler: true do
     }
 
     robot.config.handlers.gauth.scopes = ["sheets"]
-    robot.config.handlers.gauth.base_uri =  base_uri
+    robot.config.handlers.gauth.base_domain =  base_domain
+    robot.config.handlers.gauth.oauth_redir_path = oauth_redir_path
     File.delete file_path if File.exist? file_path
     f = File.new file_path, 'w'
     f.close
@@ -40,9 +44,14 @@ describe Lita::Handlers::Gauth, lita_handler: true do
       subject.check_auth auth_spy
     end
 
+    it 'can get the right auth url' do
+      send_message "Lita authed?"
+      expect(replies.last).to match handler.build_redir_url
+    end
+
     it 'listens for authorization requests' do
       send_message "Lita auth me"
-      expect(replies.last).to match(base_uri)
+      expect(replies.last).to match(base_domain)
       expect(replies.last).to match("auth-root")
     end
   end
@@ -51,10 +60,10 @@ describe Lita::Handlers::Gauth, lita_handler: true do
     let(:user_id) { 5 }
     let(:auth_url) { "/auth-root/#{user_id}" }
     let(:storage_key) { "lita_gauth_user_id" }
+    let(:redir_url) { build_redir_url }
     it { is_expected.to route_http(:get, "/auth-root/#{user_id}").to :auth_root }
-    let(:resp) { resp = http.get auth_url }
 
-    subject { resp.body }
+    subject { http.get(auth_url).body }
 
     it { is_expected.not_to be_empty }
 
@@ -62,7 +71,9 @@ describe Lita::Handlers::Gauth, lita_handler: true do
 
     it { is_expected.to match storage_key }
 
-    it { is_expected.to match base_uri }
+    it { is_expected.to match base_domain }
+
+    it { is_expected.to match handler.build_redir_url }
   end
 
   describe "#oauth_callback" do
@@ -81,7 +92,7 @@ describe Lita::Handlers::Gauth, lita_handler: true do
 
     it { is_expected.to match code }
 
-    it { is_expected.to match base_uri }
+    it { is_expected.to match base_domain }
 
     xit 'saves the api code' do
       code = '4/er7394sadfasdf'
