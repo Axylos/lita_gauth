@@ -2,6 +2,8 @@ require "spec_helper"
 require 'byebug'
 
 describe Lita::Handlers::Gauth, lita_handler: true do
+  # shared boilerplate
+  # should prob be moved to shared context
   let(:robot) { Lita::Robot.new(registry) }
   let(:file_path) { './test_file_path' }
   let(:base_domain) { "http://uri.com/virgil" }
@@ -26,6 +28,7 @@ describe Lita::Handlers::Gauth, lita_handler: true do
     f.close
 
     robot.config.handlers.gauth.data_file_path = file_path
+    # end boilerplate
   end
 
   after { File.delete file_path }

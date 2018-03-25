@@ -34,14 +34,6 @@ module Lita
         p payload
       end
 
-      def foo(req, resp)
-        resp.body << "hey there"
-      end
-
-      def bar(req, resp)
-        resp.body << "it worked"
-      end
-
       def get_user_creds(user_id)
         auth_client.get_creds user_id
       end
